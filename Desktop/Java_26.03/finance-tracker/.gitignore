@@ -1,0 +1,37 @@
+# Ignore OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignore IntelliJ IDEA and NetBeans files
+.idea/
+.nb-gradle/
+
+# Ignore Maven and Gradle build files
+target/
+.mvn/
+
+# Ignore logs
+*.log
+
+# Ignore system-specific files
+*.bak
+*.swp
+.history
+
+# Ignore Node.js
+node_modules/
+
+# Ignore Java build directories
+bin/
+out/
+
+# Ignore IDE-specific files
+.vscode/
+.classpath
+.project
+.settings/
+
+# Ignore MySQL database files
+*.sql
+*.db
