@@ -1,0 +1,41 @@
+.sidebar-menu {
+  position: fixed;
+  top: 0;
+  right: -260px;
+  width: 260px;
+  height: 100vh;
+  background: #1a1833;
+  box-shadow: -2px 0 16px #0004;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 40px 24px 24px 24px;
+  z-index: 1000;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sidebar-menu.open {
+  right: 0;
+}
+.sidebar-menu button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  text-align: left;
+  cursor: pointer;
+  padding: 12px 0;
+  transition: color 0.2s;
+}
+.sidebar-menu button:hover {
+  color: #7c6ee6;
+}
+.sidebar-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  font-size: 28px;
+  color: #fff;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
