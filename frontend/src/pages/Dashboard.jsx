@@ -7,6 +7,7 @@ import {
   getUserBalance,
   saveUserBalance,
 } from "../utils/storage/userStorage";
+import { apiClient } from "../utils/api";
 
 const Dashboard = () => {
   const [userName, setUserName] = useState("");
@@ -14,21 +15,41 @@ const Dashboard = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [user, setUser] = useState({ name: "User", balance: 0 });
   const [goals, setGoals] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedName = getUserFullName();
     const storedBalance = getUserBalance();
-    const goalsFromStorage = JSON.parse(
-      localStorage.getItem("goalsData") || "[]"
-    );
+    
     if (storedName) {
       setUserName(storedName);
       setUser({ name: storedName, balance: storedBalance });
-      setGoals(goalsFromStorage);
+      loadGoals();
     } else {
       navigate("/login");
     }
   }, [navigate]);
+
+  const loadGoals = async () => {
+    try {
+      const apiGoals = await apiClient.getGoals(3); // Limit to 3 for dashboard
+      // Transform API goals to frontend format
+      const transformedGoals = apiGoals.map(goal => ({
+        id: goal.id,
+        name: goal.name,
+        target: goal.targetAmount,
+        current: goal.currentAmount || 0,
+        icon: goal.iconName,
+      }));
+      setGoals(transformedGoals);
+    } catch (error) {
+      console.error("Error loading goals:", error);
+      // Fallback to empty array if API fails
+      setGoals([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddBalance = () => {
     const amount = prompt("Enter amount to add:");
@@ -66,26 +87,36 @@ const Dashboard = () => {
         </button>
       </div>
       <div className="goals-list">
-        {goals.slice(0, 3).map((goal, idx) => (
-          <div
-            className="goal-card"
-            key={goal.name + idx}
-            onClick={() => navigate(`/app/goal/${idx}`)}
-            style={{ cursor: "pointer" }}
-          >
-            <span className="goal-icon">{goal.icon || "🎯"}</span>
-            <div>
-              <span>{goal.name}</span>
-              <span>Goal ${goal.target}</span>
-            </div>
-            <span>
-              {goal.target
-                ? Math.round(((goal.current || 0) / goal.target) * 100)
-                : 0}
-              %
-            </span>
+        {loading ? (
+          <div style={{ color: "#bcb6f6", textAlign: "center" }}>
+            Loading goals...
           </div>
-        ))}
+        ) : goals.length === 0 ? (
+          <div style={{ color: "#bcb6f6", textAlign: "center" }}>
+            No goals yet. <button onClick={() => navigate("/app/goals")}>Add your first goal</button>
+          </div>
+        ) : (
+          goals.map((goal) => (
+            <div
+              className="goal-card"
+              key={goal.id}
+              onClick={() => navigate(`/app/goal/${goal.id}`)}
+              style={{ cursor: "pointer" }}
+            >
+              <span className="goal-icon">{goal.icon || "🎯"}</span>
+              <div>
+                <span>{goal.name}</span>
+                <span>Goal ${goal.target}</span>
+              </div>
+              <span>
+                {goal.target
+                  ? Math.round(((goal.current || 0) / goal.target) * 100)
+                  : 0}
+                %
+              </span>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

@@ -6,7 +6,8 @@ import { fetchData } from "../helpers";
 
 // loader
 export function mainLoader() {
-  const userName = fetchData("userName");
+  // Get userFullName directly from localStorage since it's stored as a plain string, not JSON
+  const userName = localStorage.getItem("userFullName");
   return { userName };
 }
 

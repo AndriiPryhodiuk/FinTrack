@@ -1,62 +1,83 @@
 package com.financeapp.service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
+import com.financeapp.dto.GoalRequest;
+import com.financeapp.dto.GoalResponse;
 import com.financeapp.model.Goal;
 import com.financeapp.model.User;
 import com.financeapp.repository.GoalRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class GoalService {
-
     private final GoalRepository goalRepository;
+    private final AuthService authService;
 
-    public GoalService(GoalRepository goalRepository) {
+    public GoalService(GoalRepository goalRepository, AuthService authService) {
         this.goalRepository = goalRepository;
+        this.authService = authService;
     }
 
-    public Goal createGoal(Goal goal) {
-        return goalRepository.save(goal);
+    public GoalResponse createGoal(GoalRequest request) {
+        User currentUser = authService.getCurrentUser();
+        Goal goal = new Goal();
+        goal.setName(request.getName());
+        goal.setTargetAmount(request.getTargetAmount());
+        goal.setCurrentAmount(BigDecimal.ZERO);
+        goal.setIconName(request.getIconName());
+        goal.setCategory(request.getCategory());
+        goal.setUser(currentUser);
+        return new GoalResponse(goalRepository.save(goal));
     }
 
-    public List<Goal> getAllGoals() {
-        return goalRepository.findAll();
-    }
-
-    public List<Goal> getGoalsByUser(User user) {
-        return goalRepository.findByUser(user);
-    }
-
-    public List<Goal> getGoalsByUserAndCategory(User user, String category) {
-        return goalRepository.findByUserAndCategory(user, category);
-    }
-
-    public List<String> getAvailableIcons() {
-        return List.of(
-            "🏖", "🚗", "🏠", "🎓", "📱", "🛍", "💍", "🎁", "✈️", "🐶"
-        );
-    }
-
-    public double calculateProgress(Long goalId) {
-        Goal goal = goalRepository.findById(goalId)
-                .orElseThrow(() -> new RuntimeException("Goal not found"));
-
-        // Calculate progress based on currentAmount vs targetAmount
-        BigDecimal targetAmount = goal.getTargetAmount();
-        BigDecimal currentAmount = goal.getCurrentAmount();
-
-        if (targetAmount.compareTo(BigDecimal.ZERO) == 0) {
-            return 0.0;
+    public List<GoalResponse> getUserGoals(Integer limit) {
+        User currentUser = authService.getCurrentUser();
+        List<Goal> goals = goalRepository.findByUserOrderByCreatedAtDesc(currentUser);
+        
+        if (limit != null && limit > 0) {
+            goals = goals.stream()
+                .limit(limit)
+                .collect(Collectors.toList());
         }
+        
+        return goals.stream()
+            .map(GoalResponse::new)
+            .collect(Collectors.toList());
+    }
 
-        BigDecimal progress = currentAmount
-                .divide(targetAmount, 4, RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(100));
+    public GoalResponse getGoal(Long id) {
+        Goal goal = goalRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Goal not found"));
+        if (!goal.getUser().equals(authService.getCurrentUser())) {
+            throw new RuntimeException("Access denied");
+        }
+        return new GoalResponse(goal);
+    }
 
-        return progress.doubleValue();
+    public GoalResponse updateGoal(Long id, GoalRequest request) {
+        Goal goal = goalRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Goal not found"));
+        if (!goal.getUser().equals(authService.getCurrentUser())) {
+            throw new RuntimeException("Access denied");
+        }
+        goal.setName(request.getName());
+        goal.setTargetAmount(request.getTargetAmount());
+        goal.setIconName(request.getIconName());
+        goal.setCategory(request.getCategory());
+        return new GoalResponse(goalRepository.save(goal));
+    }
+
+    public void deleteGoal(Long id) {
+        Goal goal = goalRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Goal not found"));
+        if (!goal.getUser().equals(authService.getCurrentUser())) {
+            throw new RuntimeException("Access denied");
+        }
+        goalRepository.delete(goal);
     }
 }

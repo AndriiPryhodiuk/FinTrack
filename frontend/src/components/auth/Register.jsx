@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/auth.css";
-import { saveUser, userExists } from "../../utils/storage/userStorage";
+import { apiClient } from "../../utils/api";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -9,19 +9,27 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+    setError("");
+    
     if (password !== repeatPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
-    if (userExists(email)) {
-      alert("User already exists!");
-      return;
+
+    setLoading(true);
+    try {
+      await apiClient.register({ fullName, email, password });
+      navigate("/login");
+    } catch (error) {
+      setError(error.message || "Registration failed");
+    } finally {
+      setLoading(false);
     }
-    saveUser({ fullName, email, password });
-    navigate("/login");
   };
 
   return (
@@ -36,6 +44,7 @@ const Register = () => {
           Join FinTrack to manage your finances
         </p>
         <form className="login-form" onSubmit={handleRegister}>
+          {error && <div className="error-message">{error}</div>}
           <label>Full name</label>
           <input
             type="text"
@@ -43,6 +52,7 @@ const Register = () => {
             required
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
+            disabled={loading}
           />
           <label>Email</label>
           <input
@@ -51,6 +61,7 @@ const Register = () => {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
           />
           <label>Password</label>
           <input
@@ -59,6 +70,7 @@ const Register = () => {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
           />
           <label>Repeat password</label>
           <input
@@ -67,9 +79,10 @@ const Register = () => {
             required
             value={repeatPassword}
             onChange={(e) => setRepeatPassword(e.target.value)}
+            disabled={loading}
           />
-          <button type="submit" className="login-btn">
-            Create account
+          <button type="submit" className="login-btn" disabled={loading}>
+            {loading ? "Creating account..." : "Create account"}
           </button>
         </form>
         <div className="login-bottom-link">

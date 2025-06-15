@@ -1,24 +1,22 @@
 // library
-import { toast } from "react-toastify";
+import { toast } from 'react-toastify';
+import { redirect } from 'react-router-dom';
+import { apiClient } from '../utils/api';
 
 // helpers
-import { deleteItem } from "../helpers";
+import { deleteItem } from '../helpers';
 
 export async function logoutAction() {
-  console.log("logoutAction called");
+  try {
+    await apiClient.logout();
+  } catch (error) {
+    console.error('Logout error:', error);
+    // Continue with logout even if API call fails
+  }
 
-  // delete the user
-  deleteItem({
-    key: "userName",
-  });
-  deleteItem({
-    key: "budgets",
-  });
-  deleteItem({
-    key: "expenses",
-  });
-  toast.success("You’ve deleted your account!");
-  // return redirect
+  // Clear local storage
+  localStorage.removeItem('userFullName');
+  localStorage.removeItem('balance');
 
-  window.location.href = "/";
+  return redirect('/');
 }

@@ -1,0 +1,943 @@
+{
+    "info": {
+        "_postman_id": "fintrack-api-collection",
+        "name": "FinTrack API",
+        "description": "Complete API collection for FinTrack application with authentication, goals, and transactions management",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Register User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response contains success message\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.message).to.include(\"successfully\");",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"{{username}}\",\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new user account"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login User (Form Data)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Session cookie is set\", function () {",
+                                    "    var setCookieHeader = pm.response.headers.get('Set-Cookie');",
+                                    "    pm.expect(setCookieHeader).to.include('JSESSIONID');",
+                                    "});",
+                                    "",
+                                    "// Extract and save session cookie",
+                                    "var setCookie = pm.response.headers.get('Set-Cookie');",
+                                    "if (setCookie) {",
+                                    "    var jsessionid = setCookie.match(/JSESSIONID=([^;]+)/);",
+                                    "    if (jsessionid && jsessionid[1]) {",
+                                    "        pm.globals.set('JSESSIONID', jsessionid[1]);",
+                                    "        console.log('Session ID saved: ' + jsessionid[1]);",
+                                    "    }",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/x-www-form-urlencoded"
+                            }
+                        ],
+                        "body": {
+                            "mode": "urlencoded",
+                            "urlencoded": [
+                                {
+                                    "key": "username",
+                                    "value": "{{username}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "{{password}}",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Login with username and password using form data (Spring Security form login)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "// Clear saved session ID",
+                                    "pm.globals.unset('JSESSIONID');",
+                                    "console.log('Session cleared');"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Cookie",
+                                "value": "JSESSIONID={{JSESSIONID}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/logout",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "logout"
+                            ]
+                        },
+                        "description": "Logout current user session (clears JSESSIONID cookie)"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "User authentication endpoints"
+        },
+        {
+            "name": "Goals",
+            "item": [
+                {
+                    "name": "Get All Goals",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response is an array\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.be.an('array');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/goals",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "goals"
+                            ]
+                        },
+                        "description": "Get all goals for the current user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Goals with Limit",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response is an array\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response length is within limit\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    var limit = pm.request.url.query.get('limit');",
+                                    "    if (limit) {",
+                                    "        pm.expect(jsonData.length).to.be.at.most(parseInt(limit));",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/goals?limit={{limit}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "goals"
+                            ],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "{{limit}}",
+                                    "description": "Maximum number of goals to return"
+                                }
+                            ]
+                        },
+                        "description": "Get goals with a limit on the number of results"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Goal",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response contains goal data\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('id');",
+                                    "    pm.expect(jsonData).to.have.property('name');",
+                                    "    pm.expect(jsonData).to.have.property('targetAmount');",
+                                    "    pm.expect(jsonData).to.have.property('currentAmount');",
+                                    "});",
+                                    "",
+                                    "// Save goal ID for other requests",
+                                    "if (pm.response.code === 200) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.globals.set('goalId', jsonData.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{goalName}}\",\n    \"targetAmount\": {{targetAmount}},\n    \"iconName\": \"{{iconName}}\",\n    \"category\": \"{{category}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/goals",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "goals"
+                            ]
+                        },
+                        "description": "Create a new financial goal"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Goal by ID",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response contains goal data\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('id');",
+                                    "    pm.expect(jsonData).to.have.property('name');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/goals/{{goalId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "goals",
+                                "{{goalId}}"
+                            ]
+                        },
+                        "description": "Get a specific goal by its ID"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Goal",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response contains updated data\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('id');",
+                                    "    pm.expect(jsonData).to.have.property('updatedAt');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"{{updatedGoalName}}\",\n    \"targetAmount\": {{updatedTargetAmount}},\n    \"iconName\": \"{{updatedIconName}}\",\n    \"category\": \"{{updatedCategory}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/goals/{{goalId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "goals",
+                                "{{goalId}}"
+                            ]
+                        },
+                        "description": "Update an existing goal"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Goal",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/goals/{{goalId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "goals",
+                                "{{goalId}}"
+                            ]
+                        },
+                        "description": "Delete a goal by its ID"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Financial goals management endpoints"
+        },
+        {
+            "name": "Transactions",
+            "item": [
+                {
+                    "name": "Get All Transactions",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response is an array\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.be.an('array');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/transactions",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions"
+                            ]
+                        },
+                        "description": "Get all transactions for the current user"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Transactions with Limit",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response is an array\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response length is within limit\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    var limit = pm.request.url.query.get('limit');",
+                                    "    if (limit) {",
+                                    "        pm.expect(jsonData.length).to.be.at.most(parseInt(limit));",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/transactions?limit={{limit}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "{{limit}}",
+                                    "description": "Maximum number of transactions to return"
+                                }
+                            ]
+                        },
+                        "description": "Get transactions with a limit on the number of results"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Transaction",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response contains transaction data\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('id');",
+                                    "    pm.expect(jsonData).to.have.property('description');",
+                                    "    pm.expect(jsonData).to.have.property('amount');",
+                                    "    pm.expect(jsonData).to.have.property('type');",
+                                    "});",
+                                    "",
+                                    "// Save transaction ID for other requests",
+                                    "if (pm.response.code === 200) {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.globals.set('transactionId', jsonData.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"description\": \"{{transactionDescription}}\",\n    \"amount\": {{transactionAmount}},\n    \"type\": \"{{transactionType}}\",\n    \"goalId\": {{goalId}}\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/transactions",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions"
+                            ]
+                        },
+                        "description": "Create a new transaction (goalId is optional)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Transaction without Goal",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response contains transaction data\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('id');",
+                                    "    pm.expect(jsonData.goalId).to.be.null;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"description\": \"{{transactionDescription}}\",\n    \"amount\": {{transactionAmount}},\n    \"type\": \"{{transactionType}}\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/transactions",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions"
+                            ]
+                        },
+                        "description": "Create a new transaction without linking to a goal"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Transaction by ID",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response contains transaction data\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('id');",
+                                    "    pm.expect(jsonData).to.have.property('description');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/transactions/{{transactionId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "{{transactionId}}"
+                            ]
+                        },
+                        "description": "Get a specific transaction by its ID"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Goal Transactions",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response is an array\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.be.an('array');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/transactions/goal/{{goalId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "goal",
+                                "{{goalId}}"
+                            ]
+                        },
+                        "description": "Get all transactions for a specific goal"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Goal Transactions with Limit",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response is an array\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response length is within limit\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    var limit = pm.request.url.query.get('limit');",
+                                    "    if (limit) {",
+                                    "        pm.expect(jsonData.length).to.be.at.most(parseInt(limit));",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/transactions/goal/{{goalId}}?limit={{limit}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "goal",
+                                "{{goalId}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "{{limit}}",
+                                    "description": "Maximum number of transactions to return"
+                                }
+                            ]
+                        },
+                        "description": "Get transactions for a specific goal with a limit"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Transaction",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/transactions/{{transactionId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "transactions",
+                                "{{transactionId}}"
+                            ]
+                        },
+                        "description": "Delete a transaction by its ID"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Financial transactions management endpoints"
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Set default values for common variables",
+                    "if (!pm.variables.get('baseUrl')) {",
+                    "    pm.variables.set('baseUrl', 'http://localhost:8080');",
+                    "}",
+                    "",
+                    "if (!pm.variables.get('username')) {",
+                    "    pm.variables.set('username', 'admin');",
+                    "}",
+                    "",
+                    "if (!pm.variables.get('password')) {",
+                    "    pm.variables.set('password', 'password123');",
+                    "}",
+                    "",
+                    "if (!pm.variables.get('email')) {",
+                    "    pm.variables.set('email', 'admin@example.com');",
+                    "}",
+                    "",
+                    "// Add session cookie to all requests (except auth endpoints)",
+                    "if (pm.request.url.path.join('/').indexOf('api/auth') === -1) {",
+                    "    var jsessionid = pm.globals.get('JSESSIONID');",
+                    "    if (jsessionid) {",
+                    "        pm.request.headers.add({",
+                    "            key: 'Cookie',",
+                    "            value: 'JSESSIONID=' + jsessionid",
+                    "        });",
+                    "    }",
+                    "}"
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "username",
+            "value": "admin",
+            "type": "string"
+        },
+        {
+            "key": "password",
+            "value": "password123",
+            "type": "string"
+        },
+        {
+            "key": "email",
+            "value": "admin@example.com",
+            "type": "string"
+        },
+        {
+            "key": "JSESSIONID",
+            "value": "",
+            "type": "string",
+            "description": "Session ID cookie for authentication"
+        },
+        {
+            "key": "limit",
+            "value": "5",
+            "type": "string",
+            "description": "Default limit for list endpoints"
+        },
+        {
+            "key": "goalName",
+            "value": "Emergency Fund",
+            "type": "string"
+        },
+        {
+            "key": "targetAmount",
+            "value": "10000",
+            "type": "string"
+        },
+        {
+            "key": "iconName",
+            "value": "piggy-bank",
+            "type": "string"
+        },
+        {
+            "key": "category",
+            "value": "Savings",
+            "type": "string"
+        },
+        {
+            "key": "updatedGoalName",
+            "value": "Updated Emergency Fund",
+            "type": "string"
+        },
+        {
+            "key": "updatedTargetAmount",
+            "value": "15000",
+            "type": "string"
+        },
+        {
+            "key": "updatedIconName",
+            "value": "bank",
+            "type": "string"
+        },
+        {
+            "key": "updatedCategory",
+            "value": "Emergency",
+            "type": "string"
+        },
+        {
+            "key": "transactionDescription",
+            "value": "Salary deposit",
+            "type": "string"
+        },
+        {
+            "key": "transactionAmount",
+            "value": "3000",
+            "type": "string"
+        },
+        {
+            "key": "transactionType",
+            "value": "INCOME",
+            "type": "string",
+            "description": "INCOME or EXPENSE"
+        },
+        {
+            "key": "goalId",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "transactionId",
+            "value": "1",
+            "type": "string"
+        }
+    ]
+}

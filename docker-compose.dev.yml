@@ -1,34 +1,58 @@
-version: "3.9"
+version: '3.9'
 
 services:
-    app:
-        build:
-            context: .
-            dockerfile: Dockerfile.dev
-        volumes:
-            - .:/app
-            - maven_cache:/root/.m2
-        ports:
-            - "8080:8080"
-        environment:
-            SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-            DB_HOST: ${DB_HOST}
-            DB_NAME: ${DB_NAME}
-            DB_USER: ${DB_USER}
-            DB_PASS: ${DB_PASS}
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: fintrack-backend-dev
+    volumes:
+      - .:/app
+      - maven_cache:/root/.m2
+    ports:
+      - '8080:8080'
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      DB_HOST: db
+      DB_NAME: fintrack
+      DB_USER: fintrack_user
+      DB_PASS: fintrack_pwd
+    depends_on:
+      db:
+        condition: service_healthy
 
-    db:
-        image: mysql:8.0
-        environment:
-            MYSQL_ROOT_PASSWORD: dev_root_pwd
-            MYSQL_DATABASE: mydb
-            MYSQL_USER: myuser
-            MYSQL_PASSWORD: dev_pwd
-        ports:
-            - "3306:3306"
-        volumes:
-            - mysql_data:/var/lib/mysql
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: fintrack-frontend-dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - '5173:5173'
+    environment:
+      NODE_ENV: development
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: dev_root_pwd
+      MYSQL_DATABASE: fintrack
+      MYSQL_USER: fintrack_user
+      MYSQL_PASSWORD: fintrack_pwd
+    ports:
+      - '3306:3306'
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-pdev_root_pwd']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
-    maven_cache:
-    mysql_data:
+  maven_cache:
+  mysql_data:

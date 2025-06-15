@@ -1,72 +1,31 @@
-package com.financeapp.model;
+package com.financeapp.dto;
+
+import com.financeapp.model.Goal;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.persistence.Table;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Column;
-import jakarta.persistence.FetchType;
-
-@Entity
-@Table(name = "goals")
-public class Goal {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+public class GoalResponse {
     private Long id;
-
-    @NotBlank
-    @Column(nullable = false)
     private String name;
-
-    @NotNull
-    @Positive
-    @Column(name = "target_amount", nullable = false)
     private BigDecimal targetAmount;
-
-    @NotNull
-    @Column(name = "current_amount", nullable = false)
     private BigDecimal currentAmount;
-
     private String iconName;
-
-    private String category; 
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
+    private String category;
     private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+    public GoalResponse(Goal goal) {
+        this.id = goal.getId();
+        this.name = goal.getName();
+        this.targetAmount = goal.getTargetAmount();
+        this.currentAmount = goal.getCurrentAmount();
+        this.iconName = goal.getIconName();
+        this.category = goal.getCategory();
+        this.createdAt = goal.getCreatedAt();
+        this.updatedAt = goal.getUpdatedAt();
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    // Default constructor
-    public Goal() {
-    }
-    
     // Getters and Setters
     public Long getId() {
         return id;
@@ -116,14 +75,6 @@ public class Goal {
         this.category = category;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -139,4 +90,4 @@ public class Goal {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
-}
+} 

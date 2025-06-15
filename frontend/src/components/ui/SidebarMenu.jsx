@@ -1,9 +1,27 @@
 import { useNavigate } from "react-router-dom";
 import "../../styles/sidebarMenu.css";
-import { logoutAction } from "../../actions/logout";
+import { apiClient } from "../../utils/api";
 
 const SidebarMenu = ({ open, onClose }) => {
   const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await apiClient.logout();
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Continue with logout even if API call fails
+    }
+
+    // Clear local storage
+    localStorage.removeItem('userFullName');
+    localStorage.removeItem('balance');
+
+    // Navigate to root page
+    navigate("/", { replace: true });
+    onClose();
+  };
+
   return (
     <div className={`sidebar-menu${open ? " open" : ""}`}>
       <button className="sidebar-close" onClick={onClose}>
@@ -41,13 +59,7 @@ const SidebarMenu = ({ open, onClose }) => {
       >
         Expenses
       </button>
-      <button
-        onClick={() => {
-          // navigate("/app/logout");
-          logoutAction();
-          onClose();
-        }}
-      >
+      <button onClick={handleLogout}>
         Logout
       </button>
     </div>

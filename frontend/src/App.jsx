@@ -15,25 +15,37 @@ import "react-toastify/dist/ReactToastify.css";
 // Layouts
 import Main, { mainLoader } from "./layouts/Main";
 
-// Actions
-import { logoutAction } from "./actions/logout";
-
 // Routes
 import Dashboard from "./pages/Dashboard";
 import Error from "./pages/Error";
 
+// Auth protection
+import { RedirectIfAuthenticated } from "./components/ProtectedAuthRoutes";
+
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Intro />,
+    element: (
+      <RedirectIfAuthenticated>
+        <Intro />
+      </RedirectIfAuthenticated>
+    ),
   },
   {
     path: "/login",
-    element: <Login />,
+    element: (
+      <RedirectIfAuthenticated>
+        <Login />
+      </RedirectIfAuthenticated>
+    ),
   },
   {
     path: "/register",
-    element: <Register />,
+    element: (
+      <RedirectIfAuthenticated>
+        <Register />
+      </RedirectIfAuthenticated>
+    ),
   },
   {
     path: "/app",
