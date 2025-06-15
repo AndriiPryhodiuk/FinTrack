@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.financeapp.model.Transaction;
+import com.financeapp.model.User;
 import com.financeapp.repository.TransactionRepository;
 
 @Service
@@ -25,7 +26,10 @@ public class TransactionService {
     }
 
     public List<Transaction> getTransactionsByCategory(String category) {
-    return transactionRepository.findByCategory(category);
-}
+        return transactionRepository.findByCategory(category);
+    }
 
+    public List<Transaction> getTransactionsByUser(User user) {
+        return transactionRepository.findByUser(user);
+    }
 }

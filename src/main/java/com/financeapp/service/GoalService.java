@@ -7,20 +7,16 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.financeapp.model.Goal;
-import com.financeapp.model.Transaction;
 import com.financeapp.model.User;
 import com.financeapp.repository.GoalRepository;
-import com.financeapp.repository.TransactionRepository;
 
 @Service
 public class GoalService {
 
     private final GoalRepository goalRepository;
-    private final TransactionRepository transactionRepository;
 
-    public GoalService(GoalRepository goalRepository, TransactionRepository transactionRepository) {
+    public GoalService(GoalRepository goalRepository) {
         this.goalRepository = goalRepository;
-        this.transactionRepository = transactionRepository;
     }
 
     public Goal createGoal(Goal goal) {
@@ -41,7 +37,7 @@ public class GoalService {
 
     public List<String> getAvailableIcons() {
         return List.of(
-            "🏖️", "🚗", "🏠", "🎓", "📱", "🛍️", "💍", "🎁", "✈️", "🐶"
+            "🏖", "🚗", "🏠", "🎓", "📱", "🛍", "💍", "🎁", "✈️", "🐶"
         );
     }
 
@@ -49,19 +45,15 @@ public class GoalService {
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new RuntimeException("Goal not found"));
 
-        List<Transaction> transactions = transactionRepository.findByGoal(goal);
-
-        BigDecimal totalSaved = transactions.stream()
-                .map(Transaction::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
+        // Calculate progress based on currentAmount vs targetAmount
         BigDecimal targetAmount = goal.getTargetAmount();
+        BigDecimal currentAmount = goal.getCurrentAmount();
 
         if (targetAmount.compareTo(BigDecimal.ZERO) == 0) {
             return 0.0;
         }
 
-        BigDecimal progress = totalSaved
+        BigDecimal progress = currentAmount
                 .divide(targetAmount, 4, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100));
 
