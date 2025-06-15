@@ -31,17 +31,18 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new AuthenticationException("Username is already taken");
-        }
-
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new AuthenticationException("Email is already registered");
         }
 
+        if (userRepository.existsByUsername(request.getEmail())) {
+            throw new AuthenticationException("Email is already registered");
+        }
+
         User user = new User();
-        user.setUsername(request.getUsername());
+        user.setUsername(request.getEmail());
         user.setEmail(request.getEmail());
+        user.setFullName(request.getFullName());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         userRepository.save(user);
@@ -58,7 +59,7 @@ public class AuthService {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             return new AuthResponse("Login successful");
         } catch (org.springframework.security.core.AuthenticationException e) {
-            throw new AuthenticationException("Invalid username or password");
+            throw new AuthenticationException("Invalid email or password");
         }
     }
 
@@ -67,7 +68,7 @@ public class AuthService {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new AuthenticationException("No user logged in");
         }
-        return userRepository.findByUsername(authentication.getName())
+        return userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new AuthenticationException("User not found"));
     }
 

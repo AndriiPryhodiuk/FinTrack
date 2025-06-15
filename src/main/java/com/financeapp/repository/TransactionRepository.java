@@ -1,7 +1,7 @@
 package com.financeapp.repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,6 +11,6 @@ import com.financeapp.model.User;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    Page<Transaction> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);
-    Page<Transaction> findByGoalOrderByCreatedAtDesc(Goal goal, Pageable pageable);
+    List<Transaction> findByUserOrderByCreatedAtDesc(User user);
+    List<Transaction> findByGoalOrderByCreatedAtDesc(Goal goal);
 }

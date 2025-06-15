@@ -1,6 +1,5 @@
 package com.financeapp.controller;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +19,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/goals")
 @Tag(name = "Goals", description = "Goal management APIs")
@@ -38,11 +39,9 @@ public class GoalController {
 
     @GetMapping
     @Operation(summary = "Get all goals for current user")
-    public ResponseEntity<Page<GoalResponse>> getGoals(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+    public ResponseEntity<List<GoalResponse>> getGoals(
             @RequestParam(required = false) Integer limit) {
-        return ResponseEntity.ok(goalService.getUserGoals(page, size, limit));
+        return ResponseEntity.ok(goalService.getUserGoals(limit));
     }
 
     @GetMapping("/{id}")

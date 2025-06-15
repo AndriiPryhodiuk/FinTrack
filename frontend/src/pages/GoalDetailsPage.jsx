@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import SidebarMenu from "../components/ui/SidebarMenu";
 import "../styles/dashboard.css";
 import "../styles/goals.css";
-import { getGoals, saveGoals } from "../utils/storage/goalsStorage";
+import { apiClient } from "../utils/api";
 
 const GoalDetailsPage = () => {
   const { id } = useParams();
@@ -11,39 +11,96 @@ const GoalDetailsPage = () => {
   const [goal, setGoal] = useState(null);
   const [amount, setAmount] = useState("");
   const [showMenu, setShowMenu] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const goals = getGoals();
-    setGoal(goals[id]);
+    loadGoal();
   }, [id]);
 
-  if (!goal) return null;
-
-  const percentage = goal.target
-    ? Math.min(100, Math.round((goal.current / goal.target) * 100))
-    : 0;
-
-  const handleAdd = (e) => {
-    e.preventDefault();
-    if (!amount || isNaN(amount) || amount <= 0) return;
-    const goals = getGoals();
-    goals[id].current = (goals[id].current || 0) + Number(amount);
-    saveGoals(goals);
-    setGoal(goals[id]);
-    setAmount("");
+  const loadGoal = async () => {
+    try {
+      setLoading(true);
+      const apiGoal = await apiClient.getGoal(id);
+      // Transform API goal to frontend format
+      const transformedGoal = {
+        id: apiGoal.id,
+        name: apiGoal.name,
+        target: apiGoal.targetAmount,
+        current: apiGoal.currentAmount || 0,
+        icon: apiGoal.iconName,
+        category: apiGoal.category,
+      };
+      setGoal(transformedGoal);
+    } catch (error) {
+      setError("Failed to load goal");
+      console.error("Error loading goal:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDelete = (goalId) => {
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    if (!amount || isNaN(amount) || amount <= 0) return;
+
+    try {
+      // Create a transaction to add money to the goal
+      await apiClient.createTransaction({
+        name: `Added to ${goal.name}`,
+        amount: Number(amount),
+        type: "income",
+        goalId: goal.id,
+      });
+      
+      // Reload the goal to get updated current amount
+      await loadGoal();
+      setAmount("");
+    } catch (error) {
+      setError("Failed to add amount");
+      console.error("Error adding amount:", error);
+    }
+  };
+
+  const handleDelete = async () => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this goal?"
     );
     if (!confirmDelete) return;
 
-    const goals = getGoals();
-    goals.splice(goalId, 1);
-    saveGoals(goals);
-    navigate("/app/goals");
+    try {
+      await apiClient.deleteGoal(id);
+      navigate("/app/goals");
+    } catch (error) {
+      setError("Failed to delete goal");
+      console.error("Error deleting goal:", error);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="dashboard-gradient-bg">
+        <div className="dashboard-center-wrap">
+          <h1 className="dashboard-title">Loading goal...</h1>
+        </div>
+      </div>
+    );
+  }
+
+  if (!goal) {
+    return (
+      <div className="dashboard-gradient-bg">
+        <div className="dashboard-center-wrap">
+          <h1 className="dashboard-title">Goal not found</h1>
+          <button onClick={() => navigate("/app/goals")}>Back to Goals</button>
+        </div>
+      </div>
+    );
+  }
+
+  const percentage = goal.target
+    ? Math.min(100, Math.round((goal.current / goal.target) * 100))
+    : 0;
 
   return (
     <div className="dashboard-gradient-bg">
@@ -56,6 +113,9 @@ const GoalDetailsPage = () => {
       <SidebarMenu open={showMenu} onClose={() => setShowMenu(false)} />
       <div className="dashboard-center-wrap">
         <h1 className="dashboard-title">{goal.name}</h1>
+        
+        {error && <div className="error-message">{error}</div>}
+        
         <div
           style={{
             display: "flex",
@@ -148,6 +208,23 @@ const GoalDetailsPage = () => {
             Add
           </button>
         </form>
+
+        <button
+          onClick={handleDelete}
+          style={{
+            background: "#ff6b6b",
+            color: "#fff",
+            border: "none",
+            borderRadius: 10,
+            padding: "8px 16px",
+            fontSize: 14,
+            fontWeight: 600,
+            cursor: "pointer",
+            marginTop: "20px",
+          }}
+        >
+          Delete Goal
+        </button>
       </div>
     </div>
   );

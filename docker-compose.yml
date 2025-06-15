@@ -1,31 +1,52 @@
-version: "3.9"
+version: '3.9'
 
 services:
-    db:
-        image: mysql:8.0
-        environment:
-            MYSQL_ROOT_PASSWORD: dev_root_pwd
-        volumes:
-            - mysql_data:/var/lib/mysql
-            - ./init:/docker-entrypoint-initdb.d
-        ports:
-            - "3306:3306"
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: dev_root_pwd
+      MYSQL_DATABASE: fintrack
+      MYSQL_USER: fintrack_user
+      MYSQL_PASSWORD: fintrack_pwd
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init:/docker-entrypoint-initdb.d
+    ports:
+      - '3306:3306'
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-pdev_root_pwd']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-    app:
-        build:
-            context: .
-            dockerfile: Dockerfile
-        container_name: java-app
-        depends_on:
-            - db
-        environment:
-            SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
-            DB_HOST: ${DB_HOST}
-            DB_USER: ${DB_USER}
-            DB_PASS: ${DB_PASS}
-            DB_NAME: ${MYSQL_DATABASE}
-        ports:
-            - "8080:8080"
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fintrack-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
+      DB_HOST: db
+      DB_USER: fintrack_user
+      DB_PASS: fintrack_pwd
+      DB_NAME: fintrack
+    ports:
+      - '8080:8080'
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: fintrack-frontend
+    depends_on:
+      - app
+    ports:
+      - '80:80'
+    environment:
+      NODE_ENV: production
 
 volumes:
-    mysql_data:
+  mysql_data:

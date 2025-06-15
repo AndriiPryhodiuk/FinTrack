@@ -1,7 +1,5 @@
 package com.financeapp.service;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +12,9 @@ import com.financeapp.model.Transaction;
 import com.financeapp.model.User;
 import com.financeapp.repository.GoalRepository;
 import com.financeapp.repository.TransactionRepository;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
@@ -62,13 +63,22 @@ public class TransactionService {
         return new TransactionResponse(savedTransaction);
     }
 
-    public Page<TransactionResponse> getUserTransactions(int page, int size) {
+    public List<TransactionResponse> getUserTransactions(Integer limit) {
         User currentUser = authService.getCurrentUser();
-        return transactionRepository.findByUserOrderByCreatedAtDesc(currentUser, PageRequest.of(page, size))
-                .map(TransactionResponse::new);
+        List<Transaction> transactions = transactionRepository.findByUserOrderByCreatedAtDesc(currentUser);
+        
+        if (limit != null && limit > 0) {
+            transactions = transactions.stream()
+                .limit(limit)
+                .collect(Collectors.toList());
+        }
+        
+        return transactions.stream()
+            .map(TransactionResponse::new)
+            .collect(Collectors.toList());
     }
 
-    public Page<TransactionResponse> getGoalTransactions(Long goalId, int page, int size) {
+    public List<TransactionResponse> getGoalTransactions(Long goalId, Integer limit) {
         User currentUser = authService.getCurrentUser();
         Goal goal = goalRepository.findById(goalId)
                 .orElseThrow(() -> new ResourceNotFoundException("Goal not found"));
@@ -77,8 +87,17 @@ public class TransactionService {
             throw new UnauthorizedException("Access denied to this goal");
         }
 
-        return transactionRepository.findByGoalOrderByCreatedAtDesc(goal, PageRequest.of(page, size))
-                .map(TransactionResponse::new);
+        List<Transaction> transactions = transactionRepository.findByGoalOrderByCreatedAtDesc(goal);
+        
+        if (limit != null && limit > 0) {
+            transactions = transactions.stream()
+                .limit(limit)
+                .collect(Collectors.toList());
+        }
+        
+        return transactions.stream()
+            .map(TransactionResponse::new)
+            .collect(Collectors.toList());
     }
 
     public TransactionResponse getTransaction(Long id) {

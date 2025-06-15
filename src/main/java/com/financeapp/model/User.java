@@ -14,7 +14,7 @@ public class User {
 
     @NotBlank
     @Column(nullable = false, unique = true)
-    private String username;
+    private String username; // This will store the email for authentication
 
     @NotBlank
     @Column(nullable = false)
@@ -24,6 +24,10 @@ public class User {
     @NotBlank
     @Column(nullable = false, unique = true)
     private String email;
+
+    @NotBlank
+    @Column(nullable = false)
+    private String fullName; // Separate field for display name
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -73,6 +77,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
     }
 
     public LocalDateTime getCreatedAt() {

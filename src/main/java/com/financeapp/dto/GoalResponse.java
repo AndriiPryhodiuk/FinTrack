@@ -10,6 +10,8 @@ public class GoalResponse {
     private String name;
     private BigDecimal targetAmount;
     private BigDecimal currentAmount;
+    private String iconName;
+    private String category;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -18,6 +20,8 @@ public class GoalResponse {
         this.name = goal.getName();
         this.targetAmount = goal.getTargetAmount();
         this.currentAmount = goal.getCurrentAmount();
+        this.iconName = goal.getIconName();
+        this.category = goal.getCategory();
         this.createdAt = goal.getCreatedAt();
         this.updatedAt = goal.getUpdatedAt();
     }
@@ -53,6 +57,22 @@ public class GoalResponse {
 
     public void setCurrentAmount(BigDecimal currentAmount) {
         this.currentAmount = currentAmount;
+    }
+
+    public String getIconName() {
+        return iconName;
+    }
+
+    public void setIconName(String iconName) {
+        this.iconName = iconName;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public LocalDateTime getCreatedAt() {

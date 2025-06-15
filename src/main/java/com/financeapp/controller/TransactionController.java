@@ -9,9 +9,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -42,10 +43,9 @@ public class TransactionController {
         @ApiResponse(responseCode = "401", description = "User not authenticated")
     })
     @GetMapping
-    public ResponseEntity<Page<TransactionResponse>> getUserTransactions(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(transactionService.getUserTransactions(page, size));
+    public ResponseEntity<List<TransactionResponse>> getUserTransactions(
+            @RequestParam(required = false) Integer limit) {
+        return ResponseEntity.ok(transactionService.getUserTransactions(limit));
     }
 
     @Operation(summary = "Get goal's transactions", description = "Retrieves all transactions for a specific goal")
@@ -56,11 +56,10 @@ public class TransactionController {
         @ApiResponse(responseCode = "404", description = "Goal not found")
     })
     @GetMapping("/goal/{goalId}")
-    public ResponseEntity<Page<TransactionResponse>> getGoalTransactions(
+    public ResponseEntity<List<TransactionResponse>> getGoalTransactions(
             @Parameter(description = "ID of the goal to get transactions for") @PathVariable Long goalId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(transactionService.getGoalTransactions(goalId, page, size));
+            @RequestParam(required = false) Integer limit) {
+        return ResponseEntity.ok(transactionService.getGoalTransactions(goalId, limit));
     }
 
     @Operation(summary = "Get transaction by ID", description = "Retrieves a specific transaction by its ID")

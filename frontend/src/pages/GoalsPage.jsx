@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import SidebarMenu from "../components/ui/SidebarMenu";
 import "../styles/dashboard.css";
 import "../styles/goals.css";
-import { getGoals, saveGoals } from "../utils/storage/goalsStorage";
+import { apiClient } from "../utils/api";
 
 const categoryOptions = [
   { name: "Transport", icon: "🚗", color: "#4B9CD3" },
@@ -20,6 +20,8 @@ const GoalsPage = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [goals, setGoals] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     name: "",
@@ -28,32 +30,67 @@ const GoalsPage = () => {
   });
 
   useEffect(() => {
-    setGoals(getGoals());
+    loadGoals();
   }, []);
+
+  const loadGoals = async () => {
+    try {
+      setLoading(true);
+      const apiGoals = await apiClient.getGoals();
+      // Transform API goals to frontend format
+      const transformedGoals = apiGoals.map(goal => ({
+        id: goal.id,
+        name: goal.name,
+        target: goal.targetAmount,
+        current: goal.currentAmount || 0,
+        icon: goal.iconName,
+        color: categoryOptions.find(cat => cat.name === goal.category)?.color || "#808080",
+      }));
+      setGoals(transformedGoals);
+    } catch (error) {
+      setError("Failed to load goals");
+      console.error("Error loading goals:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddGoal = () => {
     setForm({ name: "", target: "", category: categoryOptions[0] });
     setShowModal(true);
   };
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.target || isNaN(form.target)) return;
 
-    const newGoal = {
-      name: form.name,
-      target: parseFloat(form.target),
-      icon: form.category.icon,
-      color: form.category.color,
-      current: 0,
-    };
+    try {
+      const goalData = {
+        name: form.name,
+        target: parseFloat(form.target),
+        icon: form.category.icon,
+        category: form.category,
+      };
 
-    const updatedGoals = [...goals, newGoal];
-    setGoals(updatedGoals);
-    saveGoals(updatedGoals);
-    setForm({ name: "", target: "", category: categoryOptions[0] });
-    setShowModal(false);
+      await apiClient.createGoal(goalData);
+      await loadGoals(); // Reload goals from server
+      setForm({ name: "", target: "", category: categoryOptions[0] });
+      setShowModal(false);
+    } catch (error) {
+      setError("Failed to create goal");
+      console.error("Error creating goal:", error);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="dashboard-gradient-bg">
+        <div className="dashboard-center-wrap">
+          <h1 className="dashboard-title">Loading goals...</h1>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-gradient-bg">
@@ -68,16 +105,18 @@ const GoalsPage = () => {
       <div className="dashboard-center-wrap">
         <h1 className="dashboard-title">Saving goals</h1>
 
+        {error && <div className="error-message">{error}</div>}
+
         <div className="goals-list">
-          {goals.map((goal, idx) => {
+          {goals.map((goal) => {
             const percentage = goal.target
               ? Math.min(100, (goal.current / goal.target) * 100)
               : 0;
             return (
               <div
                 className="goal-card"
-                key={goal.name + idx}
-                onClick={() => navigate(`/app/goal/${idx}`)}
+                key={goal.id}
+                onClick={() => navigate(`/app/goal/${goal.id}`)}
                 style={{ cursor: "pointer" }}
               >
                 <div
