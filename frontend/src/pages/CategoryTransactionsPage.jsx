@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import SidebarMenu from "../components/SidebarMenu";
+import SidebarMenu from "../components/ui/SidebarMenu";
 
 const CategoryTransactionsPage = () => {
   const { category } = useParams();
@@ -18,7 +18,7 @@ const CategoryTransactionsPage = () => {
 
   return (
     <div className="dashboard-gradient-bg">
-      <button className="back-btn" onClick={() => navigate("/expenses")}>
+      <button className="back-btn" onClick={() => navigate("/app/expenses")}>
         ←
       </button>
       <SidebarMenu />

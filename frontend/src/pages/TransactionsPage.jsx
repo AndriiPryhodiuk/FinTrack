@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import SidebarMenu from "../components/SidebarMenu";
-import CategoryIcon from "../components/CategoryIcon";
+import SidebarMenu from "../components/ui/SidebarMenu";
+import CategoryIcon from "../components/ui/CategoryIcon";
 import "../styles/dashboard.css";
 import "../styles/transactions.css";
 import {
   loadTransactions,
   saveTransactions,
-} from "../components/transactionsStorage";
+} from "../utils/storage/transactionsStorage";
 
 const categoryNames = {
   food: "Food and drink",

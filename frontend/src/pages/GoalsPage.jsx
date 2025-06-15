@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import SidebarMenu from "../components/SidebarMenu";
+import SidebarMenu from "../components/ui/SidebarMenu";
 import "../styles/dashboard.css";
 import "../styles/goals.css";
-import { getGoals, saveGoals } from "../components/goalsStorage";
+import { getGoals, saveGoals } from "../utils/storage/goalsStorage";
 
 const categoryOptions = [
   { name: "Transport", icon: "🚗", color: "#4B9CD3" },
@@ -77,7 +77,7 @@ const GoalsPage = () => {
               <div
                 className="goal-card"
                 key={goal.name + idx}
-                onClick={() => navigate(`/goal/${idx}`)}
+                onClick={() => navigate(`/app/goal/${idx}`)}
                 style={{ cursor: "pointer" }}
               >
                 <div

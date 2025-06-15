@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/dashboard.css";
-import SidebarMenu from "../components/SidebarMenu";
+import SidebarMenu from "../components/ui/SidebarMenu";
 import {
   getUserFullName,
   getUserBalance,
   saveUserBalance,
-} from "../components/userStorage";
+} from "../utils/storage/userStorage";
 
 const Dashboard = () => {
   const [userName, setUserName] = useState("");
@@ -61,7 +61,7 @@ const Dashboard = () => {
       </div>
       <div className="goals-header">
         <span>Goal</span>
-        <button className="seeall-btn" onClick={() => navigate("/goals")}>
+        <button className="seeall-btn" onClick={() => navigate("/app/goals")}>
           See all
         </button>
       </div>
@@ -70,7 +70,7 @@ const Dashboard = () => {
           <div
             className="goal-card"
             key={goal.name + idx}
-            onClick={() => navigate(`/goal/${idx}`)}
+            onClick={() => navigate(`/app/goal/${idx}`)}
             style={{ cursor: "pointer" }}
           >
             <span className="goal-icon">{goal.icon || "🎯"}</span>

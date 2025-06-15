@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/introStart.css";
-import { findUser } from "./userStorage";
+import "../../styles/introStart.css";
+import { findUser } from "../../utils/storage/userStorage";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -51,7 +51,7 @@ const Login = () => {
           </button>
         </form>
         <div className="login-bottom-link">
-          <span>Don’t have an account?</span>
+          <span>Don't have an account?</span>
           <button className="link-btn" onClick={() => navigate("/register")}>
             Sign up
           </button>

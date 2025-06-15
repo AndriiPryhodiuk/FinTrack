@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import "../styles/sidebarMenu.css";
-import { logoutAction } from "../actions/logout";
+import "../../styles/sidebarMenu.css";
+import { logoutAction } from "../../actions/logout";
 
 const SidebarMenu = ({ open, onClose }) => {
   const navigate = useNavigate();

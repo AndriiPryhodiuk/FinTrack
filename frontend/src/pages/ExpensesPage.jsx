@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import SidebarMenu from "../components/SidebarMenu";
+import SidebarMenu from "../components/ui/SidebarMenu";
 import "../styles/dashboard.css";
-import DonutChart from "../components/DonutChart";
-import { loadTransactions } from "../components/transactionsStorage";
+import DonutChart from "../components/ui/DonutChart";
+import { loadTransactions } from "../utils/storage/transactionsStorage";
 
 const CATEGORY_COLORS = {
   "🛒": "#4BE36A",

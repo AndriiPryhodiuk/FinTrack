@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../styles/auth.css";
-import { saveUser, userExists } from "./userStorage";
+import "../../styles/auth.css";
+import { saveUser, userExists } from "../../utils/storage/userStorage";
 
 const Register = () => {
   const navigate = useNavigate();

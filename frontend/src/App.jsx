@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Intro from "./components/Intro";
-import Login from "./components/Login";
-import Register from "./components/Register";
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
 import GoalsPage from "./pages/GoalsPage";
 import TransactionsPage from "./pages/TransactionsPage";
 import ExpensesPage from "./pages/ExpensesPage";

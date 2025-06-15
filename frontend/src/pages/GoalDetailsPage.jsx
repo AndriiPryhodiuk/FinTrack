@@ -1,9 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import SidebarMenu from "../components/SidebarMenu";
+import SidebarMenu from "../components/ui/SidebarMenu";
 import "../styles/dashboard.css";
 import "../styles/goals.css";
-import { getGoals, saveGoals } from "../components/goalsStorage";
+import { getGoals, saveGoals } from "../utils/storage/goalsStorage";
 
 const GoalDetailsPage = () => {
   const { id } = useParams();
@@ -42,12 +42,12 @@ const GoalDetailsPage = () => {
     const goals = getGoals();
     goals.splice(goalId, 1);
     saveGoals(goals);
-    navigate("/goals");
+    navigate("/app/goals");
   };
 
   return (
     <div className="dashboard-gradient-bg">
-      <button className="back-btn" onClick={() => navigate("/goals")}>
+      <button className="back-btn" onClick={() => navigate("/app/goals")}>
         ←
       </button>
       <button className="burger-btn" onClick={() => setShowMenu(true)}>
