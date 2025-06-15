@@ -16,6 +16,9 @@ services:
             DB_NAME: ${DB_NAME}
             DB_USER: ${DB_USER}
             DB_PASS: ${DB_PASS}
+        depends_on:
+            db:
+                condition: service_healthy
 
     db:
         image: mysql:8.0
@@ -28,6 +31,21 @@ services:
             - "3306:3306"
         volumes:
             - mysql_data:/var/lib/mysql
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "mysqladmin",
+                    "ping",
+                    "-h",
+                    "localhost",
+                    "-u",
+                    "root",
+                    "-pdev_root_pwd",
+                ]
+            interval: 5s
+            timeout: 5s
+            retries: 5
 
 volumes:
     maven_cache:
