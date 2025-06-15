@@ -1,53 +1,82 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { Layout } from './layouts/MainLayout';
-import { AuthLayout } from './layouts/AuthLayout';
-import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Intro from "./components/Intro";
+import Login from "./components/Login";
+import Register from "./components/Register";
+import GoalsPage from "./pages/GoalsPage";
+import TransactionsPage from "./pages/TransactionsPage";
+import ExpensesPage from "./pages/ExpensesPage";
+import GoalDetailsPage from "./pages/GoalDetailsPage";
+import CategoryTransactionsPage from "./pages/CategoryTransactionsPage";
 
-// Pages
-import Dashboard from './pages/Dashboard';
-import ExpensesPage from './pages/ExpensesPage';
-import TransactionsPage from './pages/TransactionsPage';
-import GoalsPage from './pages/GoalsPage';
-import GoalDetailsPage from './pages/GoalDetailsPage';
-import CategoryTransactionsPage from './pages/CategoryTransactionsPage';
-import { Login } from './pages/auth/Login';
-import { Register } from './pages/auth/Register';
-import Error from './pages/Error';
-import IntroStart from './pages/IntroStart';
+// Library
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-// Context
-import { AuthProvider } from './context/AuthContext';
+// Layouts
+import Main, { mainLoader } from "./layouts/Main";
+
+// Actions
+import { logoutAction } from "./actions/logout";
+
+// Routes
+import Dashboard from "./pages/Dashboard";
+import Error from "./pages/Error";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Intro />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  },
+  {
+    path: "/app",
+    element: <Main />,
+    loader: mainLoader,
+    errorElement: <Error />,
+    children: [
+      {
+        path: "dashboard",
+        element: <Dashboard />,
+      },
+      {
+        path: "goals",
+        element: <GoalsPage />,
+      },
+      {
+        path: "transactions",
+        element: <TransactionsPage />,
+      },
+      {
+        path: "transactions/category/:category",
+        element: <CategoryTransactionsPage />,
+      },
+      {
+        path: "goal/:id",
+        element: <GoalDetailsPage />,
+        errorElement: <Error />,
+      },
+      {
+        path: "expenses",
+        element: <ExpensesPage />,
+        errorElement: <Error />,
+      },
+    ],
+  },
+]);
 
 function App() {
   return (
-    <AuthProvider>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/intro" element={<IntroStart />} />
-        
-        {/* Auth Routes */}
-        <Route element={<AuthLayout />}>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-        </Route>
-
-        {/* Protected Routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/expenses" element={<ExpensesPage />} />
-            <Route path="/transactions" element={<TransactionsPage />} />
-            <Route path="/goals" element={<GoalsPage />} />
-            <Route path="/goals/:id" element={<GoalDetailsPage />} />
-            <Route path="/category/:category" element={<CategoryTransactionsPage />} />
-          </Route>
-        </Route>
-
-        {/* Error Route */}
-        <Route path="*" element={<Error />} />
-      </Routes>
-    </AuthProvider>
+    <>
+      <RouterProvider router={router} />
+      <ToastContainer />
+    </>
   );
 }
 
