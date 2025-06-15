@@ -1,0 +1,14 @@
+FROM maven:3.9-eclipse-temurin-21-alpine
+
+WORKDIR /app
+
+# Copy only pom.xml first to cache dependencies
+COPY pom.xml .
+
+# Download dependencies separately
+RUN mvn dependency:go-offline -B
+
+# Now copy everything else
+COPY . .
+
+CMD ["mvn", "spring-boot:run"]

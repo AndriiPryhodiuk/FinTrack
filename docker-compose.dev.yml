@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        volumes:
+            - .:/app
+            - maven_cache:/root/.m2
+        ports:
+            - "8080:8080"
+        environment:
+            SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+            DB_HOST: ${DB_HOST}
+            DB_NAME: ${DB_NAME}
+            DB_USER: ${DB_USER}
+            DB_PASS: ${DB_PASS}
+
+    db:
+        image: mysql:8.0
+        environment:
+            MYSQL_ROOT_PASSWORD: dev_root_pwd
+            MYSQL_DATABASE: mydb
+            MYSQL_USER: myuser
+            MYSQL_PASSWORD: dev_pwd
+        ports:
+            - "3306:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
+
+volumes:
+    maven_cache:
+    mysql_data:

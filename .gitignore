@@ -33,5 +33,7 @@ out/
 .settings/
 
 # Ignore MySQL database files
-*.sql
 *.db
+
+# Ignore env files
+*.env*

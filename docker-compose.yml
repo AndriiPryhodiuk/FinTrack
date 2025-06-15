@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+    db:
+        image: mysql:8.0
+        environment:
+            MYSQL_ROOT_PASSWORD: dev_root_pwd
+        volumes:
+            - mysql_data:/var/lib/mysql
+            - ./init:/docker-entrypoint-initdb.d
+        ports:
+            - "3306:3306"
+
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: java-app
+        depends_on:
+            - db
+        environment:
+            SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE}
+            DB_HOST: ${DB_HOST}
+            DB_USER: ${DB_USER}
+            DB_PASS: ${DB_PASS}
+            DB_NAME: ${MYSQL_DATABASE}
+        ports:
+            - "8080:8080"
+
+volumes:
+    mysql_data:
